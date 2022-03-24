@@ -15,8 +15,9 @@ print(spam_files[-1])
 
 full_pipeline = Pipeline([
     ('read raw', pipelines_fun.Open_mails()),
+    ('subject var',pipelines_fun.get_variables_from_object()),
 ])
 
-df = full_pipeline.fit_transform(ham_files)
+df = full_pipeline.fit_transform(spam_files)
 
-print(df.head())
+print(df.iloc[20])
