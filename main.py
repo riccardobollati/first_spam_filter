@@ -20,4 +20,6 @@ full_pipeline = Pipeline([
 
 df = full_pipeline.fit_transform(spam_files)
 
+bolla
+
 print(df.iloc[20])
