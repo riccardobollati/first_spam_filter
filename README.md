@@ -7,3 +7,5 @@ the sets used for this project are:
 - easy_ham: 2500 non-spam messages.  These are typically quite easy to differentiate from spam, since they frequently do not contain any spammish signatures (like HTML etc).
 
 - spam: 500 spam messages, all received from non-spam-trap sources.
+
+the total spam ratio is 1/6
