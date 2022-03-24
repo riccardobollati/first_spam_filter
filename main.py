@@ -8,12 +8,15 @@ import pipelines_fun
 ham_files    = [name for name in sorted(os.listdir("datasets\spam\easy_ham")) if len(name) >= 8]
 spam_files   = [name for name in sorted(os.listdir("datasets\spam\spam")) if len(name) >= 8]
 
-spam = True
+ham_files.append(0)
+spam_files.append(1)
+
+print(spam_files[-1])
 
 full_pipeline = Pipeline([
-    ('read raw', pipelines_fun.open_mails()),
+    ('read raw', pipelines_fun.Open_mails()),
 ])
 
-df = full_pipeline.fit_transform(spam_files)
+df = full_pipeline.fit_transform(ham_files)
 
-print(df.iloc[1])
+print(df.head())

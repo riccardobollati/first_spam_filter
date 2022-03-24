@@ -8,7 +8,7 @@ from email.parser import Parser
 import pandas as pd
 
 
-class open_mails(BaseEstimator, TransformerMixin ):
+class Open_mails(BaseEstimator, TransformerMixin ):
     
     def __init__(self):
         pass
@@ -19,18 +19,18 @@ class open_mails(BaseEstimator, TransformerMixin ):
     def transform(self, raw):
         
         X = pd.DataFrame()
-        
+        print(raw[-1])
         raw_list = []
-        directory = "spam" if True else "easy_ham"
+        directory = "spam" if raw[-1] else "easy_ham"
 
-        for name in raw:
+        for name in raw[:-1]:
             
             with open(os.path.join("datasets\spam\\", directory, name), "rb") as f:
             
                 raw_list.append(email.parser.BytesParser(policy=email.policy.default).parse(f))
         
         X["raw"] = raw_list
-        X["label"] = [True] * len(raw_list)
+        X["label"] = raw[-1]
 
         return X
 
