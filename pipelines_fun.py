@@ -19,7 +19,6 @@ class Open_mails(BaseEstimator, TransformerMixin ):
     def transform(self, raw):
         
         X = pd.DataFrame()
-        print(raw[-1])
         raw_list = []
         directory = "spam" if raw[-1] else "easy_ham"
 
@@ -65,21 +64,21 @@ class get_variables_from_object(BaseEstimator, TransformerMixin):
             
             text = i.get("Subject")
             #check if include:
-            include_q_mark.append("?" in text)
-            include_dollar.append("$" in text)
+            include_q_mark.append(int("?" in text))
+            include_dollar.append(int("$" in text))
             #word included bool:
-            include_free.append("free" in text.lower())
-            include_save.append("save" in text.lower())
-            include_best.append("best" in text.lower())
+            include_free.append(int("free" in text.lower()))
+            include_save.append(int("save" in text.lower()))
+            include_best.append(int("best" in text.lower()))
             #number of exclamation points
             N_expoints.append(sum(1 for elem in text if elem == "!"))
             #caps lock ratio
             if len(text) > 0 :
                 CL_ratio.append(sum(1 for elem in text if elem.isupper())/len(text.replace(" ","")))
-                empty.append(False)
+                empty.append(0)
             else:
                 CL_ratio.append(0)
-                empty.append(True)
+                empty.append(1)
             text_p.append(text)
 
         
