@@ -5,6 +5,7 @@ import pipelines_fun
 import matplotlib.pyplot as plt 
 import numpy as np
 from sklearn.model_selection import StratifiedShuffleSplit
+from sklearn.preprocessing import StandardScaler
 
 #load the data form the dataset folder
 #len(name) >= 8 to avoid "cmds" file
@@ -48,4 +49,4 @@ def compare_var(var):
 
     plt.show()
 
-compare_var(var="caps lock ratio")
+compare_var(var="special char")

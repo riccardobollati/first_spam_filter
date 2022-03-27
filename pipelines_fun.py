@@ -1,12 +1,14 @@
-from cProfile import label
 import os
 from unicodedata import name
 from sklearn.base import BaseEstimator, TransformerMixin
 import email
 import email.policy
 from email.parser import Parser
+from sklearn.preprocessing import StandardScaler
 import pandas as pd
+import numpy as np
 
+scaler = StandardScaler()
 
 class Open_mails(BaseEstimator, TransformerMixin ):
     
@@ -43,8 +45,7 @@ class get_variables_from_object(BaseEstimator, TransformerMixin):
     def transform(self,X):
         
         #simbol included bool:
-        include_q_mark = []
-        include_dollar = []
+        number_of_spec_char = []
         #word included bool:
         include_free = []
         include_save = []
@@ -52,9 +53,7 @@ class get_variables_from_object(BaseEstimator, TransformerMixin):
         #caps lock word ratio float:
         CL_ratio = []
         #number of exclamation points int:
-        N_expoints =[]
         #is subject empty?
-        empty = []
         text_p = []
 
         # print(mail.get("Subject"))
@@ -63,36 +62,33 @@ class get_variables_from_object(BaseEstimator, TransformerMixin):
         for i in X["raw"]:
             
             text = i.get("Subject")
-            #check if include:
-            include_q_mark.append(int("?" in text))
-            include_dollar.append(int("$" in text))
+            #number of scec char :
+            ex = sum(1 for elem in text if elem == "!")
+            qm = sum(1 for elem in text if elem == "?")
+            dl = sum(1 for elem in text if elem == "$")
+            if len(text) > 0:
+                number_of_spec_char.append((ex + qm + dl)/len(text))
+            else:
+                number_of_spec_char.append(0)
             #word included bool:
             include_free.append(int("free" in text.lower()))
             include_save.append(int("save" in text.lower()))
             include_best.append(int("best" in text.lower()))
-            #number of exclamation points
-            N_expoints.append(sum(1 for elem in text if elem == "!"))
             #caps lock ratio
             if len(text) > 0 :
                 CL_ratio.append(sum(1 for elem in text if elem.isupper())/len(text.replace(" ","")))
-                empty.append(0)
             else:
                 CL_ratio.append(0)
-                empty.append(1)
             text_p.append(text)
 
         
-        X["include ?"]        = include_q_mark
-        X["include $"]        = include_dollar
+        #X["special char"]     = scaler.fit_transform(np.array(number_of_spec_char).reshape(-1, 1))
+        X["special char"]     = number_of_spec_char
         X["include free"]     = include_free
         X["include save"]     = include_save
         X["include best"]     = include_best
         X["caps lock ratio"]  = CL_ratio
-        X["number of !"]      = N_expoints
-        X["empty"]            = empty
         X["subject_text"]     = text_p
-
-
 
         return X
 
