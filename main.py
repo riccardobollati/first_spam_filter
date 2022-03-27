@@ -28,29 +28,24 @@ spam_subject_df = df_ham.drop(["raw"],axis=1)
 
 df_total = pd.concat([df_spam,df_ham],axis=0,join="outer",ignore_index=True)
 
-#shuffle and split the dataset
+#shuffle and split the dataset into training and test sets
 split = StratifiedShuffleSplit(n_splits = 1, test_size = 0.2, random_state = 42)
 
 for train_index, test_index in split.split(df_total, df_total["label"]):
 	strat_train_set = df_total.loc[train_index]
 	strat_test_set = df_total.loc[test_index]
 
-print(strat_test_set["label"].value_counts())
-print(strat_train_set["label"].value_counts())
 
-#data for violin
-# clr_ham  = df_ham["caps lock ratio"].tolist()#.append([np.NaN]*(len(df_spam)-len(df_ham)))
-# clr_spam = df_spam["caps lock ratio"].tolist()
+def compare_var(var):
+    fig, (ax1, ax2) = plt.subplots(1,2,figsize=(10,5))
 
-clr_df = pd.DataFrame([df_spam["caps lock ratio"],df_ham["caps lock ratio"]])
+    ax1.hist(strat_train_set.loc[strat_train_set["label"]==0][var],bins=50)
+    ax2.hist(strat_train_set.loc[strat_train_set["label"]==1][var],bins=50)
 
-fig, (ax1, ax2) = plt.subplots(1,2)
+    fig.suptitle(f"{var} distribution")
+    ax1.set_title("ham")
+    ax2.set_title("spam")
 
-ax1.hist(df_ham["caps lock ratio"],bins=50)
-ax2.hist(df_spam["caps lock ratio"],bins=50)
+    plt.show()
 
-fig.suptitle("caps lock ratio distribution")
-ax1.set_title("ham")
-ax2.set_title("spam")
-
-plt.show()
+compare_var(var="caps lock ratio")
