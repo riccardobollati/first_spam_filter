@@ -100,8 +100,21 @@ class GetVariableFromText(BaseEstimator, TransformerMixin):
     
     def transform(self,X):
 
+        urls_number       = []
         Special_chr_ratio = []
         upper_case_ratio  = []
+
+        for i in X["raw"]:
+
+            text = i.get_payload()
+            urln = 0
+
+            #get the number of urls
+            for i in text.split(" "):
+                if "http://" in i:
+                    urln = urln + 1
+            urls_number.append(urln)
+
 
 
         return X
