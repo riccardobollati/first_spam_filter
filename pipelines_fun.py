@@ -95,8 +95,8 @@ class GetVariableFromText(BaseEstimator, TransformerMixin):
     
     def __init__(self):
         pass
-    def fit(slelf, X):
-        return Self
+    def fit(self, X):
+        return self
     
     def transform(self,X):
 
