@@ -1,5 +1,4 @@
 import os
-from unicodedata import name
 from sklearn.base import BaseEstimator, TransformerMixin
 import email
 import email.policy
@@ -89,6 +88,21 @@ class get_variables_from_object(BaseEstimator, TransformerMixin):
         X["include best"]     = include_best
         X["caps lock ratio"]  = CL_ratio
         X["subject_text"]     = text_p
+
+        return X
+
+class GetVariableFromText(BaseEstimator, TransformerMixin):
+    
+    def __init__(self):
+        pass
+    def fit(slelf, X):
+        return Self
+    
+    def transform(self,X):
+
+        Special_chr_ratio = []
+        upper_case_ratio  = []
+
 
         return X
 
