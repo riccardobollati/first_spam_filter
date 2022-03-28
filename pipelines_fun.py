@@ -1,4 +1,5 @@
 import os
+import string
 from sklearn.base import BaseEstimator, TransformerMixin
 import email
 import email.policy
@@ -43,8 +44,8 @@ class get_variables_from_object(BaseEstimator, TransformerMixin):
     
     def transform(self,X):
         
-        #simbol included bool:
-        number_of_spec_char = []
+        #special char ratio:
+        spec_char_ratio = []
         #word included bool:
         include_free = []
         include_save = []
@@ -66,9 +67,9 @@ class get_variables_from_object(BaseEstimator, TransformerMixin):
             qm = sum(1 for elem in text if elem == "?")
             dl = sum(1 for elem in text if elem == "$")
             if len(text) > 0:
-                number_of_spec_char.append((ex + qm + dl)/len(text))
+                spec_char_ratio.append((ex + qm + dl)/len(text))
             else:
-                number_of_spec_char.append(0)
+                spec_char_ratio.append(0)
             #word included bool:
             include_free.append(int("free" in text.lower()))
             include_save.append(int("save" in text.lower()))
@@ -82,12 +83,12 @@ class get_variables_from_object(BaseEstimator, TransformerMixin):
 
         
         #X["special char"]     = scaler.fit_transform(np.array(number_of_spec_char).reshape(-1, 1))
-        X["special char"]     = number_of_spec_char
-        X["include free"]     = include_free
-        X["include save"]     = include_save
-        X["include best"]     = include_best
-        X["caps lock ratio"]  = CL_ratio
-        X["subject_text"]     = text_p
+        X["(S) special char"]     = spec_char_ratio
+        X["(S) include free"]     = include_free
+        X["(S) include save"]     = include_save
+        X["(S) include best"]     = include_best
+        X["(S) caps lock ratio"]  = CL_ratio
+        X["(S) subject_text"]     = text_p
 
         return X
 
@@ -101,21 +102,40 @@ class GetVariableFromText(BaseEstimator, TransformerMixin):
     def transform(self,X):
 
         urls_number       = []
-        Special_chr_ratio = []
+        special_chr_ratio = []
         upper_case_ratio  = []
 
         for i in X["raw"]:
 
             text = i.get_payload()
+            print(type(text))
+            print(text)
+            text = text.split(" ")
             urln = 0
 
             #get the number of urls
-            for i in text.split(" "):
-                if "http://" in i:
+            for index, word in enumerate(text):
+                
+                if "http://" in word:
+                    
                     urln = urln + 1
+                    del text[index]
+
             urls_number.append(urln)
 
+            text = "".join(text)
+            
+            special_ratio_num = sum(1 for letter in text if letter not in list(string.ascii_letters))/len(text)
+            upper_case_num    = sum(1 for letter in text if letter.isupper())/len(text)
 
+            special_chr_ratio.append(special_ratio_num)
+            upper_case_ratio.append(upper_case_num)
+
+        X["(T) urls number"]         = urls_number
+        X["(T) special char ratio"]  = special_chr_ratio
+        X["(T) upper case ratio"]    = upper_case_ratio
+
+        X = X.drop(["raw"],axis=1)
 
         return X
 

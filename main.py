@@ -18,14 +18,12 @@ spam_files.append(1)
 full_pipeline = Pipeline([
     ('read raw', pipelines_fun.Open_mails()),
     ('subject var',pipelines_fun.get_variables_from_object()),
+    ('text var',pipelines_fun.GetVariableFromText()),
 ])
 
 #create two dataframe
 df_spam         = full_pipeline.fit_transform(spam_files)
-spam_subject_df = df_spam.drop(["raw"],axis=1)
-
 df_ham          = full_pipeline.fit_transform(ham_files)
-spam_subject_df = df_ham.drop(["raw"],axis=1)
 
 df_total = pd.concat([df_spam,df_ham],axis=0,join="outer",ignore_index=True)
 
@@ -36,6 +34,7 @@ for train_index, test_index in split.split(df_total, df_total["label"]):
 	strat_train_set = df_total.loc[train_index]
 	strat_test_set = df_total.loc[test_index]
 
+print(df_total.head())
 
 def compare_var(var):
     fig, (ax1, ax2) = plt.subplots(1,2,figsize=(10,5))
@@ -49,4 +48,4 @@ def compare_var(var):
 
     plt.show()
 
-compare_var(var="special char")
+compare_var(var="(T) urls number")
