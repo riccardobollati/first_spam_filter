@@ -14,4 +14,5 @@ all those variables has been extracted from the raw text through the pipeline, t
 # visualize data
 after we've created the Subject related variables and inserted them into the data frames we can visualize the data to get some insights:
 <h3>caps lock ratio</h3>
-![Optional Text](../master/images/compare_cps_lockratio.png)
+
+![caps lock ratio](images/compare_cps_lock_ratio.png)
