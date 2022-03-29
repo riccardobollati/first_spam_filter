@@ -22,7 +22,9 @@ full_pipeline = Pipeline([
 ])
 
 #create two dataframe
+print("--------------spam")
 df_spam         = full_pipeline.fit_transform(spam_files)
+print("--------------ham")
 df_ham          = full_pipeline.fit_transform(ham_files)
 
 df_total = pd.concat([df_spam,df_ham],axis=0,join="outer",ignore_index=True)
@@ -34,7 +36,7 @@ for train_index, test_index in split.split(df_total, df_total["label"]):
 	strat_train_set = df_total.loc[train_index]
 	strat_test_set = df_total.loc[test_index]
 
-print(df_total.head())
+print(strat_train_set.head())
 
 def compare_var(var):
     fig, (ax1, ax2) = plt.subplots(1,2,figsize=(10,5))

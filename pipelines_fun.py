@@ -83,12 +83,12 @@ class get_variables_from_object(BaseEstimator, TransformerMixin):
 
         
         #X["special char"]     = scaler.fit_transform(np.array(number_of_spec_char).reshape(-1, 1))
-        X["(S) special char"]     = spec_char_ratio
-        X["(S) include free"]     = include_free
-        X["(S) include save"]     = include_save
-        X["(S) include best"]     = include_best
-        X["(S) caps lock ratio"]  = CL_ratio
-        X["(S) subject_text"]     = text_p
+        X["(S) special char ratio"] = spec_char_ratio
+        X["(S) include free"]       = include_free
+        X["(S) include save"]       = include_save
+        X["(S) include best"]       = include_best
+        X["(S) caps lock ratio"]    = CL_ratio
+        X["(S) subject_text"]       = text_p
 
         return X
 
@@ -104,13 +104,15 @@ class GetVariableFromText(BaseEstimator, TransformerMixin):
         urls_number       = []
         special_chr_ratio = []
         upper_case_ratio  = []
-
+        
         for i in X["raw"]:
 
             text = i.get_payload()
-            print(type(text))
-            print(text)
-            text = text.split(" ")
+
+            if isinstance(text,list):
+                text = str(text[0]).split(" ")
+            else:
+                text = str(text).split(" ")
             urln = 0
 
             #get the number of urls
@@ -125,8 +127,12 @@ class GetVariableFromText(BaseEstimator, TransformerMixin):
 
             text = "".join(text)
             
-            special_ratio_num = sum(1 for letter in text if letter not in list(string.ascii_letters))/len(text)
-            upper_case_num    = sum(1 for letter in text if letter.isupper())/len(text)
+            if len(text):
+                special_ratio_num = sum(1 for letter in text if letter not in list(string.ascii_letters))/len(text)
+                upper_case_num    = sum(1 for letter in text if letter.isupper())/len(text)
+
+            special_ratio_num   = 0
+            upper_case_num      = 0
 
             special_chr_ratio.append(special_ratio_num)
             upper_case_ratio.append(upper_case_num)
@@ -138,9 +144,3 @@ class GetVariableFromText(BaseEstimator, TransformerMixin):
         X = X.drop(["raw"],axis=1)
 
         return X
-
-
-
-
-
-
