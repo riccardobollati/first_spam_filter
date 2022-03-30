@@ -52,9 +52,6 @@ class get_variables_from_object(BaseEstimator, TransformerMixin):
         include_best = []
         #caps lock word ratio float:
         CL_ratio = []
-        #number of exclamation points int:
-        #is subject empty?
-        text_p = []
 
         # print(mail.get("Subject"))
         # print(mail.get_payload())
@@ -79,7 +76,6 @@ class get_variables_from_object(BaseEstimator, TransformerMixin):
                 CL_ratio.append(sum(1 for elem in text if elem.isupper())/len(text.replace(" ","")))
             else:
                 CL_ratio.append(0)
-            text_p.append(text)
 
         
         #X["special char"]     = scaler.fit_transform(np.array(number_of_spec_char).reshape(-1, 1))
@@ -88,7 +84,6 @@ class get_variables_from_object(BaseEstimator, TransformerMixin):
         X["(S) include save"]       = include_save
         X["(S) include best"]       = include_best
         X["(S) caps lock ratio"]    = CL_ratio
-        X["(S) subject_text"]       = text_p
 
         return X
 
