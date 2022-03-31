@@ -64,6 +64,10 @@ print(type(train_set.loc[51]))
 #model
 forest_clf = RandomForestClassifier(random_state=42)
 forest_clf.fit(train_set,train_set_y)
-forest_clf.predict(train_set.loc[51].array.reshape(1,len(train_set.loc[51])))
+prova = train_set.loc[51].array.reshape(1,len(train_set.loc[51]))
+print(prova)
+print(type(prova))
+print(prova.shape)
+forest_clf.predict(prova)
 
 print("------",train_set_y[51])
