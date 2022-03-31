@@ -1,3 +1,4 @@
+from cgi import test
 import os
 import pandas as pd
 from sklearn.pipeline import Pipeline
@@ -49,15 +50,16 @@ def compare_var(var):
 
     plt.show()
 
+compare_var("(T) is HTML")
+print(train_set.head())
 
-train_set_y = train_set["label"]
-train_set   = train_set.drop(["label"],axis = 1)
+# train_set_y = train_set["label"]
+# train_set   = train_set.drop(["label"],axis = 1)
 
-test_set_y  = test_set["label"]
-test_set    = test_set.drop(["label"],axis = 1)
+# test_set_y  = test_set["label"]
+# test_set    = test_set.drop(["label"],axis = 1)
 
-train_set.info()
 
 #model
-forest_clf = RandomForestClassifier(random_state=42)
-forest_clf.fit(train_set,train_set_y)
+# forest_clf = RandomForestClassifier(random_state=42)
+# forest_clf.fit(train_set,train_set_y)

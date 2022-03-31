@@ -4,11 +4,11 @@ from sklearn.base import BaseEstimator, TransformerMixin
 import email
 import email.policy
 from email.parser import Parser
-from sklearn.preprocessing import StandardScaler
 import pandas as pd
-import numpy as np
+from bs4 import BeautifulSoup
+import warnings
 
-scaler = StandardScaler()
+warnings.filterwarnings("ignore", category=UserWarning, module='bs4')
 
 class Open_mails(BaseEstimator, TransformerMixin ):
     
@@ -99,15 +99,25 @@ class GetVariableFromText(BaseEstimator, TransformerMixin):
         urls_number       = []
         special_chr_ratio = []
         upper_case_ratio  = []
+        is_html           = []
         
         for i in X["raw"]:
 
             text = i.get_payload()
 
             if isinstance(text,list):
-                text = str(text[0]).split(" ")
+                text = str(text[0])
+
+            if bool(BeautifulSoup(text, "html.parser").find()):
+                is_html.append(1)
+
+                soup = BeautifulSoup(text, features="html.parser")
+                text = soup.get_text()
             else:
-                text = str(text).split(" ")
+                is_html.append(0)
+            
+            text = text.split(" ")
+
             urln = 0
 
             #get the number of urls
@@ -121,13 +131,14 @@ class GetVariableFromText(BaseEstimator, TransformerMixin):
             urls_number.append(urln)
 
             text = "".join(text)
-            
+
             if len(text):
                 special_ratio_num = sum(1 for letter in text if letter not in list(string.ascii_letters))/len(text)
                 upper_case_num    = sum(1 for letter in text if letter.isupper())/len(text)
+            else:
+                special_ratio_num   = 0
+                upper_case_num      = 0
 
-            special_ratio_num   = 0
-            upper_case_num      = 0
 
             special_chr_ratio.append(special_ratio_num)
             upper_case_ratio.append(upper_case_num)
@@ -135,6 +146,7 @@ class GetVariableFromText(BaseEstimator, TransformerMixin):
         X["(T) urls number"]         = urls_number
         X["(T) special char ratio"]  = special_chr_ratio
         X["(T) upper case ratio"]    = upper_case_ratio
+        X["(T) is HTML"]             = is_html
 
         X = X.drop(["raw"],axis=1)
 
