@@ -1,5 +1,6 @@
 from cgi import test
 import os
+from matplotlib import transforms
 import pandas as pd
 from sklearn.pipeline import Pipeline
 import pipelines_fun
@@ -53,13 +54,16 @@ def compare_var(var):
 compare_var("(T) is HTML")
 print(train_set.head())
 
-# train_set_y = train_set["label"]
-# train_set   = train_set.drop(["label"],axis = 1)
+train_set_y = train_set["label"]
+train_set   = train_set.drop(["label"],axis = 1)
 
-# test_set_y  = test_set["label"]
-# test_set    = test_set.drop(["label"],axis = 1)
+test_set_y  = test_set["label"]
+test_set    = test_set.drop(["label"],axis = 1)
 
-
+print(type(train_set.loc[51]))
 #model
-# forest_clf = RandomForestClassifier(random_state=42)
-# forest_clf.fit(train_set,train_set_y)
+forest_clf = RandomForestClassifier(random_state=42)
+forest_clf.fit(train_set,train_set_y)
+forest_clf.predict(train_set.loc[51].array.reshape(1,len(train_set.loc[51])))
+
+print("------",train_set_y[51])
