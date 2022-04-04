@@ -1,14 +1,12 @@
-from cgi import test
 import os
-from matplotlib import transforms
 import pandas as pd
 from sklearn.pipeline import Pipeline
 import pipelines_fun
 import matplotlib.pyplot as plt 
-import numpy as np
 from sklearn.model_selection import StratifiedShuffleSplit
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import confusion_matrix
+from sklearn.linear_model import SGDClassifier
+from sklearn.metrics import precision_recall_curve
+from sklearn.model_selection import cross_val_predict
 
 #load the data form the dataset folder
 #len(name) >= 8 to avoid "cmds" file
@@ -25,9 +23,9 @@ full_pipeline = Pipeline([
 ])
 
 #create two dataframe
-print("--------------spam")
+print("--------------processing spam mails")
 df_spam         = full_pipeline.fit_transform(spam_files)
-print("--------------ham")
+print("--------------processing ham mails")
 df_ham          = full_pipeline.fit_transform(ham_files)
 
 df_total = pd.concat([df_spam,df_ham],axis=0,join="outer",ignore_index=True)
@@ -51,7 +49,12 @@ def compare_var(var):
 
     plt.show()
 
-compare_var("(T) is HTML")
+def plot_precision_recall_vs_threshold(precisions, recalls, thresholds):
+    plt.plot(thresholds, precisions[:-1], "b--", label="Precision", linewidth=2)
+    plt.plot(thresholds, recalls[:-1], "g-", label="Recall", linewidth=2)
+    plt.legend(loc="center right", fontsize=16)
+    plt.xlabel("Threshold", fontsize=16)        
+
 print(train_set.head())
 
 train_set_y = train_set["label"]
@@ -60,14 +63,14 @@ train_set   = train_set.drop(["label"],axis = 1)
 test_set_y  = test_set["label"]
 test_set    = test_set.drop(["label"],axis = 1)
 
-print(type(train_set.loc[51]))
 #model
-forest_clf = RandomForestClassifier(random_state=42)
-forest_clf.fit(train_set,train_set_y)
-prova = train_set.loc[51].array.reshape(1,len(train_set.loc[51]))
-print(prova)
-print(type(prova))
-print(prova.shape)
-forest_clf.predict(prova)
+sdg_clf = SGDClassifier(random_state=42)
+y_train_predict = cross_val_predict(sdg_clf,train_set,train_set_y,cv = 3,method="decision_function")
 
-print("------",train_set_y[51])
+precision, recall, threshold = precision_recall_curve(train_set_y,y_train_predict)
+
+plot_precision_recall_vs_threshold(precision, recall, threshold)
+plt.show()
+
+plt.plot(recall,precision)
+plt.show()
