@@ -4,8 +4,9 @@ from sklearn.pipeline import Pipeline
 import pipelines_fun
 import matplotlib.pyplot as plt 
 from sklearn.model_selection import StratifiedShuffleSplit
-from sklearn.linear_model import SGDClassifier
+from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import precision_recall_curve
+from sklearn.metrics import precision_score, recall_score
 from sklearn.model_selection import cross_val_predict
 
 #load the data form the dataset folder
@@ -64,13 +65,18 @@ test_set_y  = test_set["label"]
 test_set    = test_set.drop(["label"],axis = 1)
 
 #model
-sdg_clf = SGDClassifier(random_state=42)
-y_train_predict = cross_val_predict(sdg_clf,train_set,train_set_y,cv = 3,method="decision_function")
+log_reg = LogisticRegression(solver="lbfgs", max_iter=1000, random_state=42)
+log_reg.fit(train_set,train_set_y)
+y_predict = log_reg.decision_function(train_set)
 
-precision, recall, threshold = precision_recall_curve(train_set_y,y_train_predict)
+# precision = precision_score(test_set_y,y_predict)
+# recall = recall_score(test_set_y,y_predict)
+# print("prec: ",precision," recall: ",recall)
+
+precision, recall, threshold = precision_recall_curve(train_set_y,y_predict)
 
 plot_precision_recall_vs_threshold(precision, recall, threshold)
-plt.show()
+plt.figure()
 
 plt.plot(recall,precision)
 plt.show()
