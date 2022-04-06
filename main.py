@@ -69,6 +69,11 @@ log_reg = LogisticRegression(solver="lbfgs", max_iter=1000, random_state=42)
 log_reg.fit(train_set,train_set_y)
 y_predict = log_reg.decision_function(train_set)
 
+#print the coefficent values
+for name, value in zip(train_set.columns,log_reg.coef_[0]):
+    print(name,": ",value)
+
+print(y_predict[:20])
 # precision = precision_score(test_set_y,y_predict)
 # recall = recall_score(test_set_y,y_predict)
 # print("prec: ",precision," recall: ",recall)
