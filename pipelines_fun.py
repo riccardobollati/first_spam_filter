@@ -5,8 +5,10 @@ import email
 import email.policy
 from email.parser import Parser
 import pandas as pd
-from bs4 import BeautifulSoup
 import warnings
+
+import re
+from html import unescape
 
 warnings.filterwarnings("ignore", category=UserWarning, module='bs4')
 
@@ -87,6 +89,30 @@ class get_variables_from_object(BaseEstimator, TransformerMixin):
 
         return X
 
+def html_to_plain_text(html):
+    text = re.sub('<head.*?>.*?</head>', '', html, flags=re.M | re.S | re.I)
+    text = re.sub('<a\s.*?>', ' HYPERLINK ', text, flags=re.M | re.S | re.I)
+    text = re.sub('<.*?>', '', text, flags=re.M | re.S)
+    text = re.sub(r'(\s*\n)+', '\n', text, flags=re.M | re.S)
+    return unescape(text)
+            
+def email_to_text(email):
+    html = None
+    for part in email.walk():
+        ctype = part.get_content_type()
+        if not ctype in ("text/plain", "text/html"):
+            continue
+        try:
+            content = part.get_content()
+        except: # in case of encoding issues
+            content = str(part.get_payload())
+        if ctype == "text/plain":
+            return content
+        else:
+            html = content
+    if html:
+        return html_to_plain_text(html)
+
 class GetVariableFromText(BaseEstimator, TransformerMixin):
     
     def __init__(self):
@@ -99,24 +125,25 @@ class GetVariableFromText(BaseEstimator, TransformerMixin):
         urls_number       = []
         special_chr_ratio = []
         upper_case_ratio  = []
-        is_html           = []
+        mail_type         = []
+        is_empty          = []
         
         for i in X["raw"]:
 
             text = i.get_payload()
 
             if isinstance(text,list):
+                
+                mail_type.append("multipart({})".format(", ".join([sub_email.get_content_type() for sub_email in text])))
                 text = str(text[0])
-
-            if bool(BeautifulSoup(text, "html.parser").find()):
-                is_html.append(1)
-
-                soup = BeautifulSoup(text, features="html.parser")
-                text = soup.get_text()
-            else:
-                is_html.append(0)
             
-            text = text.split(" ")
+            else:
+                mail_type.append(i.get_content_type())
+            
+            #extract plain text from HTML
+            text = email_to_text(i)
+            if len(text):
+                text = text.split(" ")
 
             urln = 0
 
@@ -146,7 +173,7 @@ class GetVariableFromText(BaseEstimator, TransformerMixin):
         X["(T) urls number"]         = urls_number
         X["(T) special char ratio"]  = special_chr_ratio
         X["(T) upper case ratio"]    = upper_case_ratio
-        X["(T) is HTML"]             = is_html
+        X["(T) text type"]           = mail_type
 
         X = X.drop(["raw"],axis=1)
 
