@@ -1,16 +1,43 @@
+from copy import copy
 import os
 import string
+from types import NoneType
 from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.preprocessing import OneHotEncoder
 import email
 import email.policy
 from email.parser import Parser
 import pandas as pd
 import warnings
+import numpy as np
 
 import re
 from html import unescape
-
 warnings.filterwarnings("ignore", category=UserWarning, module='bs4')
+
+def html_to_plain_text(html):
+    text = re.sub('<head.*?>.*?</head>', '', html, flags=re.M | re.S | re.I)
+    text = re.sub('<a\s.*?>', ' HYPERLINK ', text, flags=re.M | re.S | re.I)
+    text = re.sub('<.*?>', '', text, flags=re.M | re.S)
+    text = re.sub(r'(\s*\n)+', '\n', text, flags=re.M | re.S)
+    return unescape(text)
+            
+def email_to_text(email):
+    html = None
+    for part in email.walk():
+        ctype = part.get_content_type()
+        if not ctype in ("text/plain", "text/html"):
+            continue
+        try:
+            content = part.get_content()
+        except: # in case of encoding issues
+            content = str(part.get_payload())
+        if ctype == "text/plain":
+            return content
+        else:
+            html = content
+    if html:
+        return html_to_plain_text(html)
 
 class Open_mails(BaseEstimator, TransformerMixin ):
     
@@ -89,30 +116,6 @@ class get_variables_from_object(BaseEstimator, TransformerMixin):
 
         return X
 
-def html_to_plain_text(html):
-    text = re.sub('<head.*?>.*?</head>', '', html, flags=re.M | re.S | re.I)
-    text = re.sub('<a\s.*?>', ' HYPERLINK ', text, flags=re.M | re.S | re.I)
-    text = re.sub('<.*?>', '', text, flags=re.M | re.S)
-    text = re.sub(r'(\s*\n)+', '\n', text, flags=re.M | re.S)
-    return unescape(text)
-            
-def email_to_text(email):
-    html = None
-    for part in email.walk():
-        ctype = part.get_content_type()
-        if not ctype in ("text/plain", "text/html"):
-            continue
-        try:
-            content = part.get_content()
-        except: # in case of encoding issues
-            content = str(part.get_payload())
-        if ctype == "text/plain":
-            return content
-        else:
-            html = content
-    if html:
-        return html_to_plain_text(html)
-
 class GetVariableFromText(BaseEstimator, TransformerMixin):
     
     def __init__(self):
@@ -128,7 +131,7 @@ class GetVariableFromText(BaseEstimator, TransformerMixin):
         mail_type         = []
         is_empty          = []
         
-        for i in X["raw"]:
+        for index, i in enumerate(X["raw"]):
 
             text = i.get_payload()
 
@@ -142,6 +145,7 @@ class GetVariableFromText(BaseEstimator, TransformerMixin):
             
             #extract plain text from HTML
             text = email_to_text(i)
+
             if len(text):
                 text = text.split(" ")
 
@@ -175,6 +179,28 @@ class GetVariableFromText(BaseEstimator, TransformerMixin):
         X["(T) upper case ratio"]    = upper_case_ratio
         X["(T) text type"]           = mail_type
 
-        X = X.drop(["raw"],axis=1)
+        X.drop(["raw"],axis=1, inplace=True)
 
         return X
+
+class TypeHotEncoder(BaseEstimator, TransformerMixin):
+    
+    def __init__(self):
+        pass
+    def fit(self, X):
+        return self
+    
+    def transform(self,X):
+        
+        cat_array = np.array(X["(T) text type"].tolist())
+
+        type_encoder = OneHotEncoder()
+        type_1hot = type_encoder.fit_transform(cat_array.reshape(-1, 1))
+        type_1hot = pd.DataFrame(type_1hot.toarray())
+        
+        X.drop(["(T) text type"],axis=1,inplace=True)
+        X = pd.concat([X, type_1hot], axis=1, join='inner')
+        
+        return X
+
+
