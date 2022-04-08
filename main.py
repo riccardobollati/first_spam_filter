@@ -3,6 +3,7 @@ import pandas as pd
 from sklearn.pipeline import Pipeline
 import pipelines_fun
 import matplotlib.pyplot as plt 
+import numpy as np
 
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.linear_model import LogisticRegression
@@ -44,12 +45,13 @@ def main():
         ('hot encoder', pipelines_fun.TypeHotEncoder()),
     ])
 
-    #create two dataframe
+    #create two dataframe one for spam mails and one for ham mails
     print("--------------processing spam mails")
     df_spam         = full_pipeline.fit_transform(spam_files)
     print("--------------processing ham mails")
     df_ham          = full_pipeline.fit_transform(ham_files)
 
+    #merge the two dataframe and return only one, filling Na
     df_total = pd.concat([df_spam,df_ham],axis=0,join="outer",ignore_index=True)
     df_total.fillna(0, inplace=True)
 
@@ -62,16 +64,15 @@ def main():
         train_set = df_total.loc[train_index]
         test_set = df_total.loc[test_index]
 
+    #divide X from labels
     train_set_y = train_set["label"]
     train_set   = train_set.drop(["label"],axis = 1)
 
     test_set_y  = test_set["label"]
     test_set    = test_set.drop(["label"],axis = 1)
 
-    print("fin")
-
     #model
-    log_reg = LogisticRegression(solver= "liblinear",random_state=42)
+    log_reg = LogisticRegression(solver= "lbfgs",random_state=42)
     
     #train the model
     log_reg.fit(train_set,train_set_y)
@@ -80,18 +81,27 @@ def main():
     y_predict_decision = log_reg.decision_function(test_set)
     y_predict = log_reg.predict(test_set)
 
-    #print the coefficent values
-    for name, value in zip(train_set.columns,log_reg.coef_[0]):
-        print(name,": ",value)
-
     precision, recall, threshold = precision_recall_curve(test_set_y,y_predict_decision)
+    
+    #set the threshold to obtain a 90% precision
+    th_90_precision = threshold[np.argmax(precision >= 0.9)]
+    predict_n1_72_th = [i > th_90_precision for i in y_predict_decision]
 
-    print(precision_score(test_set_y,y_predict), recall_score(test_set_y,y_predict))
+    precision_th = precision_score(test_set_y,predict_n1_72_th)
+    recall_th = recall_score(test_set_y,predict_n1_72_th)
+
+    print("precision: ",precision_th," recall: ",recall_th)
 
     plot_precision_recall_vs_threshold(precision, recall, threshold)
+    plt.axvline(x = th_90_precision,color = "r", ls = ":",alpha = 0.8)
+    plt.plot([th_90_precision],[precision_th],"ro")
+    plt.plot([th_90_precision],[recall_th],"ro")
     plt.figure()
 
     plt.plot(recall,precision)
+    plt.plot([recall_th, recall_th], [0, precision_th],'r:')
+    plt.plot([0, recall_th], [precision_th, precision_th],'r:')
+    plt.plot([recall_th],[precision_th],"ro")
     plt.show()
 
 if __name__ == "__main__":

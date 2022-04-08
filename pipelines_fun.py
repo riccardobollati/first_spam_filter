@@ -197,6 +197,8 @@ class TypeHotEncoder(BaseEstimator, TransformerMixin):
         type_encoder = OneHotEncoder()
         type_1hot = type_encoder.fit_transform(cat_array.reshape(-1, 1))
         type_1hot = pd.DataFrame(type_1hot.toarray())
+        type_1hot.columns = type_encoder.categories_
+
         
         X.drop(["(T) text type"],axis=1,inplace=True)
         X = pd.concat([X, type_1hot], axis=1, join='inner')
