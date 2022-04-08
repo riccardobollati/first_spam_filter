@@ -1,7 +1,5 @@
-from copy import copy
 import os
 import string
-from types import NoneType
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import OneHotEncoder
 import email
