@@ -13,5 +13,5 @@ the sets used for this project are:
 the total spam ratio is 1/6
 # final model
 the final model is a logistic regression model, with a threshold of -1.72, i've chosen it trying to find the best equilibrium between recall and precision, giving to precision the priority
-![recall vs precision](images\recall_prec.png)
-![recall and precision vs threshold](images\recall_prec_th.png)
+![recall vs precision](images/recall_prec.png)
+![recall and precision vs threshold](images/recall_prec_th.png)
