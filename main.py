@@ -99,6 +99,8 @@ def main():
     plt.figure()
 
     plt.plot(recall,precision)
+    plt.xlabel("recall")
+    plt.ylabel("precision")
     plt.plot([recall_th, recall_th], [0, precision_th],'r:')
     plt.plot([0, recall_th], [precision_th, precision_th],'r:')
     plt.plot([recall_th],[precision_th],"ro")
